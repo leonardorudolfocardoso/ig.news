@@ -1,4 +1,6 @@
 import { signIn, useSession } from 'next-auth/client'
+import { api } from '../../services/api';
+import { getStripe } from '../../services/stripe-js';
 import styles from './styles.module.scss'
 
 interface SubscribeButtonProps {
@@ -14,7 +16,15 @@ export function SubscribeButton({ priceId }: SubscribeButtonProps) {
       return;
     } 
 
-    
+    try {
+      const res = await api.post('/subscribe')
+      const { sessionId } = res.data;
+      const stripeJs = await getStripe();
+
+      await stripeJs.redirectToCheckout({ sessionId });
+    } catch (error) {
+      alert(error);
+    }
   }
 
   return (
